@@ -1,5 +1,9 @@
 from langchain_core.tools import tool
 
+# for weather tools
+import requests
+import json
+
 @tool
 def multiply(a: int, b: int) -> int:
     """Multiply two numbers."""
@@ -43,3 +47,31 @@ def createTicket(typeOfPhone: str, refNumber: str) -> str:
     print(f"creating ticket in ServiceNow for {typeOfPhone} and {refNumber}")
     
     return "INC0012345"
+
+
+@tool
+def getWeather(latitude: str, longitude: str) -> str:
+    """
+    This function gets current weather data for a given location. It takes 2 parameters: the latitude and the longitude of the location, and returns a JSON string containing the current weather at the location
+    """
+    
+    dictResp = None
+    strURL = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true"
+    headers1 = {'Content-Type': 'application/json'}
+    
+    # sending post request and saving response as response dict 
+    try:
+        resp = requests.get(strURL, headers=headers1) 
+        # print("sendRequest.resp: %s" % resp.text)
+        if (resp.status_code == 200):
+            dictResp = json.loads(resp.text)       
+            # print(dictResp)
+        else:
+            print("sendRequest HTTP Status: %d - %s" % (resp.status_code, resp.reason))
+            print("URL: " + strURL)
+            # print(resp)
+    
+    except Exception as ex:
+        print(ex)
+    
+    return dictResp

@@ -12,11 +12,11 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableSequence
 from langchain.globals import set_debug
 
-from langchain_community.utilities import OpenWeatherMapAPIWrapper
+# from langchain_community.utilities import OpenWeatherMapAPIWrapper
 
 from bedrock_ai import init_model
 
-from mytools import multiply, divide, getRealTimeValues, sendMail
+from mytools import multiply, divide, getRealTimeValues, sendMail, getWeather
 
 # init model, from AWS Bedrock. Tested with several model, it seems not all can use agents or tools
 def init_model2():
@@ -71,15 +71,16 @@ def run_agent(model):
 def test_simple_agent(model):
 
     # key is invalid...
+    """
     os.environ["OPENWEATHERMAP_API_KEY"] = ""
     weather = OpenWeatherMapAPIWrapper()
     weather_data = weather.run("London,GB")
     print(weather_data)
-
-    question = "What is the current weather in Paris, France?"
+"""
+    question = "What is the current weather in Boston, MA, USA?"
 
     # only tool is weather
-    tools = [weather.run]
+    tools = [getWeather]
     agent = create_react_agent(model, tools)
 
     input_message = {
@@ -98,12 +99,13 @@ def test_simple_agent(model):
     
 # init model, using anthropic's Claude, through AWS bedrock
 model = init_model()
-# test_simple_agent(model)
+test_simple_agent(model)
 
+"""
 # test model on its own, without agent or tool
 test_model(model)
 
 # finally create and run agent, with multiple tools
 print("\n--- Now running Agent ---\n")
 run_agent(model)
-
+"""
