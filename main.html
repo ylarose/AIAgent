@@ -1,0 +1,153 @@
+<html>
+<title>Support Tools v2 </title>
+
+<link rel="icon" type="image/x-icon" href="favicon-python.ico">
+
+	
+<script type="text/javascript">
+let CHAT_TEXT = "";
+
+function displayError(strErr) {
+	console.log('ERROR:  ' + strErr);
+}
+
+
+function getInput(inputId) {
+	var value = document.getElementById(inputId).value;
+	return value;
+}
+
+// get data from Web Service and display it to table
+// strRequest can be from either tab: 'statistics' or 'details'
+function getData(isInitial) {
+
+	let requestURL = null;
+	let postData = null
+	
+	// get instructions or questions from html
+	
+	console.log('getData parameters: isInitial: ' + isInitial);
+	
+	// new request
+	let request = new XMLHttpRequest();
+
+	if (isInitial == true) {
+		requestURL = '/setupagent';
+		// requestURL = requestURL + "?server=" + server + "&date=" + date_s;
+		console.log("sending " + requestURL);
+		strQuestion = getInput('instructions');
+		postData = "instructions=" + strQuestion; 
+	}
+	else {
+		requestURL = '/askquestion';
+		console.log("sending " + requestURL);
+		strQuestion = getInput('question');
+		postData = "question=" + strQuestion; 
+	}
+	
+	// update chat text with question
+	updateChat(true, strQuestion);
+	
+	request.open('POST', requestURL);
+	request.responseType = 'json';
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.send(postData);
+
+	request.onload = async function() {
+		// Cache le loading
+		// unshow_loading();
+		HTTPCode = request.status;
+		if (HTTPCode != 200) {
+			console.log(request);
+			if (HTTPCode == 204)
+				strError = "Error HTTP: 204 - No Data";
+			else
+				strError = "Error HTTP: " + HTTPCode + " - " + request.statusText;
+			console.log(strError);
+
+			// updateTable([], 0, "");
+			return;
+		}		
+		else { // get HTTP 200, looks good
+			let data = request.response;
+			console.log('received from server: ' + data);
+			if (data.length == 0) { 
+				displayError("No data received"); 
+			}			
+				// update chat text with answer
+			else {
+				updateChat(false, data);
+				resetQuestion();
+			}
+		}
+	}
+}
+
+
+// update chat data 
+function updateChat(isQuestion, data) {
+	if (isQuestion == true)
+		CHAT_TEXT = CHAT_TEXT + "<br>" + "<b>Question: </b>" + data
+	else
+		CHAT_TEXT = CHAT_TEXT + "<br>" + "<b>Answer: </b>" + data + "<br> ========== <br>"
+	
+	console.log("CHAT_TEXT = " + CHAT_TEXT);
+	var chatDiv = document.getElementById('chat-text');
+	chatDiv.innerHTML = CHAT_TEXT;
+	
+}
+
+// reset question, once we got an answer
+function resetQuestion() {
+	var chatDiv = document.getElementById('question');
+	chatDiv.innerHTML = "";
+}
+
+</script>
+
+<body>
+
+<center>
+<h1> AI Agent demo</h1>	
+</center>
+
+<br>
+<br>
+
+<table>
+<tr><td> <label style="font-size: 20px;">Instructions </label></td></tr>
+
+<tr><td> 	
+<textarea name="Text1" id="instructions" cols="150" rows="10" style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
+Your name is Bob, you speak english, your are helping customers having issues with their iPhones
+The only iPhone types supported by you are: iPhone 14 and iPhone 15.
+If the customer's iPhone type is different, apologize and tell them you will forward their request to an agent.
+If the customer's iPhone type is 14 or 15, ask them if the iPhone is damaged or lost.
+if the customer iPhone is damaged or lost, ask for the reference number, found in the email they have received.
+Finally, create a ticket using the createTicket tool, and give the customer the ticket number returned by the tool.
+To end conversation, whish the customer a very happy day.
+</textarea>
+</td></tr>
+
+<tr>
+	<td> <button type="button" onclick="getData(true);" >Init Agent</button> </td>
+</tr>
+</table>
+
+
+<table>
+<tr>
+	<td>
+		<label style="font-size: 20px;">Question :</label> 
+		<input type="text" id="question" name="" value="" size=200 maxlength=200 style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
+	</td>
+</tr>
+<tr>
+	<td> <button type="button" onclick="getData(false);" >Send Question</button> </td>
+</tr>
+</table>
+	
+<div id="chat-text"></div>
+
+</body>
+</html>
