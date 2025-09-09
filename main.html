@@ -1,11 +1,10 @@
 <html>
-<title>Support Tools v2 </title>
+<title>AI Agent Demo</title>
 
 <link rel="icon" type="image/x-icon" href="favicon-python.ico">
 
-	
 <script type="text/javascript">
-let CHAT_TEXT = "";
+let CHAT_TEXT = '<table style="width:70%"> ';
 
 function displayError(strErr) {
 	console.log('ERROR:  ' + strErr);
@@ -37,16 +36,19 @@ function getData(isInitial) {
 		console.log("sending " + requestURL);
 		strQuestion = getInput('instructions');
 		postData = "instructions=" + strQuestion; 
+		// when Init Agent is called (isInitial == true), reset chat history
+		resetChat();
 	}
 	else {
 		requestURL = '/askquestion';
 		console.log("sending " + requestURL);
 		strQuestion = getInput('question');
 		postData = "question=" + strQuestion; 
+		
+		// update chat text with question
+		updateChat(true, strQuestion);
 	}
 	
-	// update chat text with question
-	updateChat(true, strQuestion);
 	
 	request.open('POST', requestURL);
 	request.responseType = 'json';
@@ -70,7 +72,7 @@ function getData(isInitial) {
 		}		
 		else { // get HTTP 200, looks good
 			let data = request.response;
-			console.log('received from server: ' + data);
+			console.log('received from server: ' + data.substring(0, 50) + '...');
 			if (data.length == 0) { 
 				displayError("No data received"); 
 			}			
@@ -83,24 +85,42 @@ function getData(isInitial) {
 	}
 }
 
-
 // update chat data 
-function updateChat(isQuestion, data) {
+function updateChat_old(isQuestion, data) {
 	if (isQuestion == true)
 		CHAT_TEXT = CHAT_TEXT + "<br>" + "<b>Question: </b>" + data
 	else
-		CHAT_TEXT = CHAT_TEXT + "<br>" + "<b>Answer: </b>" + data + "<br> ========== <br>"
+		CHAT_TEXT = CHAT_TEXT + "<br>" + "<b>Answer: " + data + "</b> <br> ========== <br>"
 	
-	console.log("CHAT_TEXT = " + CHAT_TEXT);
 	var chatDiv = document.getElementById('chat-text');
 	chatDiv.innerHTML = CHAT_TEXT;
 	
 }
 
+// update chat data, using table
+function updateChat(isQuestion, data) {
+	if (isQuestion == true)
+		CHAT_TEXT = CHAT_TEXT + '<tr style="text-align:right;"><td>' + '<b>Question: </b>' + data + '</td></tr>'
+	else
+		CHAT_TEXT = CHAT_TEXT + '<tr style="text-align:left;"><td>' + '<b>Answer: </b>' + data + '</td></tr>'
+	
+	console.log(CHAT_TEXT + "</table>");
+	
+	var chatDiv = document.getElementById('chat-text');
+	chatDiv.innerHTML = CHAT_TEXT + "</table>";
+	
+}
+
+// update chat data, using table
+function resetChat() {
+	var chatDiv = document.getElementById('chat-text');
+	chatDiv.innerHTML = '<table style="width:70%"> ';
+}
+
 // reset question, once we got an answer
 function resetQuestion() {
-	var chatDiv = document.getElementById('question');
-	chatDiv.innerHTML = "";
+	var div = document.getElementById('question');
+	let CHAT_TEXT = div.value = "";
 }
 
 </script>
@@ -108,46 +128,51 @@ function resetQuestion() {
 <body>
 
 <center>
-<h1> AI Agent demo</h1>	
+<h2> AI Agent demo</h2>	
 </center>
 
-<br>
 <br>
 
 <table>
 <tr><td> <label style="font-size: 20px;">Instructions </label></td></tr>
-
 <tr><td> 	
-<textarea name="Text1" id="instructions" cols="150" rows="10" style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
-Your name is Bob, you speak english, your are helping customers having issues with their iPhones
-The only iPhone types supported by you are: iPhone 14 and iPhone 15.
+<textarea name="Text1" id="instructions" cols="150" rows="8" style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
+Your name is Bob, you speak English, your are helping customers having issues with their iPhones.
+Start by asking how you can help.
+Then you should ask them the type of iPohne they have.
 If the customer's iPhone type is different, apologize and tell them you will forward their request to an agent.
 If the customer's iPhone type is 14 or 15, ask them if the iPhone is damaged or lost.
 if the customer iPhone is damaged or lost, ask for the reference number, found in the email they have received.
-Finally, create a ticket using the createTicket tool, and give the customer the ticket number returned by the tool.
-To end conversation, whish the customer a very happy day.
+Finally, create a ticket using the createTicket tool, send an email to the customer using the email address associate with the reference number,
+and give the customer the ticket number returned by the tool.
+To end conversation, wish the customer a very happy day.
 </textarea>
+
+<!--
+If you feel that the customer gets upset or irritated, propose to forward the request to an agent
+-->
+
 </td></tr>
 
 <tr>
 	<td> <button type="button" onclick="getData(true);" >Init Agent</button> </td>
 </tr>
-</table>
 
+<tr><td>
+	<label style="font-size: 20px;">Question</label> 
+</td></tr>
 
-<table>
-<tr>
-	<td>
-		<label style="font-size: 20px;">Question :</label> 
-		<input type="text" id="question" name="" value="" size=200 maxlength=200 style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
-	</td>
-</tr>
+<tr><td>
+	<input type="text" id="question" name="" value="" size=150 maxlength=150 style="font-size: 16px; padding: 5px; border: 2px solid #000; border-radius: 4px;">
+</td></tr>
+
 <tr>
 	<td> <button type="button" onclick="getData(false);" >Send Question</button> </td>
 </tr>
+
 </table>
 	
-<div id="chat-text"></div>
+<div id="chat-text" style="font-size: 16px;"></div>
 
 </body>
 </html>

@@ -10,6 +10,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 from bedrock_ai import init_model
+from open_ai import init_model_openAI
 from agent_server import init_agent, ask_question
 
 app = Flask(__name__)
@@ -55,17 +56,19 @@ def setupAgent():
     jsdata = None
     
     instructions = request.form.get('instructions')
-    log("instructions: %s" % (instructions))
+    log(f"instructions: {instructions[0:50]}...")
   
     # init LLM model
     model = init_model()
-
+    # model = init_model_openAI()
+    print(model)
+    
     # now, init agent with instructions
     agent, response = init_agent(model, instructions)
     G_AGENT = agent
-    log(f"got answer {response}")
+    log(f"got answer {response[0:50]}...")
     
-    jsdata = jsonify(response) 
+    jsdata = jsonify(response)
         
     return jsdata
 
@@ -79,9 +82,9 @@ def askQuestion():
     
     question = request.form.get('question')
     
-    log(f"question: {question}")    
+    log(f"question: {question[0:50]}...")
     response = ask_question(G_AGENT, question)
-    log(f"response: {response}")
+    log(f"response: {response[0:50]}...")
     
     jsdata = jsonify(response) 
         

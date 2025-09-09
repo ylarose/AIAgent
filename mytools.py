@@ -29,14 +29,28 @@ def getRealTimeValues(customer: str, valueType: str) -> int:
         return 10
 
 @tool
+def lookupMail(refNumber: str) -> str:
+    """ function to lookup email address, based on reference number
+        it takes one arguments: refNumber, which represents the telephon or order reference number, and returns the email address associated to that reference number
+        if the reference number is not found, it returns "unknown"
+    """
+    print(f"calling lookupMail with {refNumber}")
+    if refNumber.startswith("REF"):
+        return "yanick.larose@email.com"
+    else:
+        return "unknown"
+
+
+@tool
 def sendMail(dest: str, content: str) -> str:
     """ function to send email
         it takes two arguments: dest which represents the person or system we want to which we sending the mail,
         and content, which represents the content of the email
     """
-    print(f"sending to {dest} the mail: {content}") 
-    return "sendMail(dest, content) OK"
+    # print(f"Sending to {dest} the mail: {content}, with attachement {attachement}") 
+    return f"sendMail : {dest}, {content}"
     
+
 @tool
 def createTicket(typeOfPhone: str, refNumber: str) -> str:
     """ this function creates a service ticket, it takes two arguments: typeOfPhone and refNumber
