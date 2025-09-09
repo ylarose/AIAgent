@@ -10,4 +10,6 @@ Needs a config.json file, including the AWS_BEARER_TOKEN_BEDROCK key
 
 It also contains the init and embedding fucntions for bedrock, in bedrock_ai.py, and a set of simple dummy tools in mytools.py
 
+Added a server version of the CC agent : agent_server.py, a main.html to test it, and a small webserver: https.py
+
 
